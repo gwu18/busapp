@@ -24,6 +24,7 @@
             console.log("📡 Checking if geolocation is supported...");
 
             if ("geolocation" in navigator) {
+
                 console.log("✅ Geolocation is available!");
 
                 navigator.geolocation.getCurrentPosition(
@@ -52,13 +53,25 @@
 
         function sendLocationToBackend(latitude, longitude) {
             console.log("📡 Sending location to backend...");
+            var payload = {
+                latitude: latitude,
+                longitude: longitude
+            };
 
+            var data = new FormData();
+            data.append( "json", JSON.stringify( payload ) );
             fetch("https://super-orbit-7x76vwwj44vhwpj6-5000.app.github.dev/send_location", {
                 method: "POST",
                 headers: {
+                    'Accept': 'application/json',
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ latitude: latitude, longitude: longitude })
+                body: data
+            })
+            .then(response => response.text())  // ✅ Log raw response before parsing JSON
+            .then(text => {
+                console.log("🔹 Raw server response:", text);
+                return JSON.parse(text);  // Try to parse JSON only if it's valid
             })
             .then(response => response.json())
             .then(data => {
@@ -66,6 +79,7 @@
                 document.getElementById("address").innerText = `Address: ${data.address}`;
             })
             .catch(error => console.error("❌ Fetch error:", error));
+            
         }
     </script>
 </body>
